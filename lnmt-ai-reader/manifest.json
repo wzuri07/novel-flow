@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "LNMT AI Reader",
+  "version": "1.0.0",
+  "description": "Improve LNMT chapter readability with OpenAI in a side panel.",
+  "permissions": ["activeTab", "sidePanel", "storage"],
+  "host_permissions": [
+    "https://lnmtl.com/*",
+    "https://api.openai.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Improve Chapter"
+  },
+  "side_panel": {
+    "default_path": "sidebar.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://lnmtl.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

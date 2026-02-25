@@ -153,3 +153,26 @@ Click the gear icon ⚙️ in the top right to configure:
 ## 🙏 Credits
 
 Built with [Lovable](https://lovable.dev), [Ollama](https://ollama.com), and [Google Gemini](https://aistudio.google.com).
+
+---
+
+## 🧩 Beginner Chrome Extension (Optional)
+
+If you want a browser sidebar workflow instead of the full PWA, a ready-to-load Chrome extension scaffold is included in `lnmt-ai-reader/`.
+
+### Extension features
+
+- Opens a Chrome side panel from the toolbar button
+- Extracts visible chapter text from `lnmtl.com`
+- Sends chapter text to OpenAI for grammar/readability cleanup
+- Renders improved text in the side panel
+- Stores API key locally with `chrome.storage.local`
+
+### Load it in Chrome
+
+1. Open `chrome://extensions/`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select the `lnmt-ai-reader` folder from this repo
+
+> ⚠️ Keep in mind this extension sends chapter text to OpenAI APIs and stores your API key in your local browser profile.
