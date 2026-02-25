@@ -8,6 +8,8 @@ export interface AppSettings {
   corsProxy: string;
    geminiKey: string;
    useGemini: boolean;
+  geminiConcurrency: number;
+  geminiChunkSize: number;
 }
 
 const DEFAULTS: AppSettings = {
@@ -18,6 +20,8 @@ const DEFAULTS: AppSettings = {
   corsProxy: 'http://100.80.232.61:8010/proxy',
   geminiKey: '',
   useGemini: false,
+  geminiConcurrency: 3,
+  geminiChunkSize: 8000,
 };
 
 const STORAGE_KEY = 'novel-reader-settings';

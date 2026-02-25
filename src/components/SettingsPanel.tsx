@@ -112,6 +112,34 @@ export default function SettingsPanel({ open, onClose, settings, onUpdate }: Set
             />
             <p className="text-xs text-muted-foreground mt-1">If set, Gemini will be used instead of Ollama</p>
           </div>
+          {/* Gemini Concurrency */}
+          <div>
+            <label className="text-sm text-foreground block mb-1.5">Gemini Concurrency</label>
+            <input
+              type="number"
+              min={1}
+              max={8}
+              value={settings.geminiConcurrency}
+              onChange={(e) => onUpdate({ geminiConcurrency: Math.max(1, Number(e.target.value) || 1) })}
+              className="w-full px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <p className="text-xs text-muted-foreground mt-1">How many parallel requests to run when using Gemini (watch rate limits).</p>
+          </div>
+
+          {/* Gemini Chunk Size */}
+          <div>
+            <label className="text-sm text-foreground block mb-1.5">Gemini Chunk Size</label>
+            <input
+              type="number"
+              min={2000}
+              max={20000}
+              step={500}
+              value={settings.geminiChunkSize}
+              onChange={(e) => onUpdate({ geminiChunkSize: Math.max(2000, Number(e.target.value) || 2000) })}
+              className="w-full px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Max characters per Gemini chunk (smaller → more requests).</p>
+          </div>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import {
   smoothTextWithOllama,
   parseChapterUrl,
   smoothTextWithGemini,
+  smoothTextWithGeminiParallel,
 } from '@/lib/chapterUtils';
 
 type Stage = 'fetching' | 'extracting' | 'smoothing';
@@ -40,9 +41,13 @@ const Index = () => {
 
         setStage('smoothing');
         const smoothed = settings.useGemini && settings.geminiKey
-  ? await smoothTextWithGemini(raw, settings.geminiKey, (chunk) => {
-      setChapterText(chunk);
-    })
+  ? await smoothTextWithGeminiParallel(
+      raw,
+      settings.geminiKey,
+      (chunk) => { setChapterText(chunk); },
+      settings.geminiConcurrency,
+      settings.geminiChunkSize
+    )
   : await smoothTextWithOllama(raw, settings.ollamaUrl, settings.modelName, (chunk) => {
       setChapterText(chunk);
     });

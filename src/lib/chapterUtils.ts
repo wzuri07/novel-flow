@@ -37,28 +37,30 @@ export async function fetchChapterHtml(url: string, corsProxy: string): Promise<
   return res.text();
 }
 
+const EDITOR_SYSTEM_PROMPT = `You are an expert editor specializing in Chinese web novels (xianxia, wuxia, cultivation fantasy) translated to English. Polish the machine-translated text to read like a professionally published English novel.
+
+Rules:
+- Fix grammar errors and unnatural phrasing
+- Combine short choppy sentences into natural flowing prose where appropriate
+- Make dialogue sound natural while preserving meaning
+- Keep cultivation terms (qi, dao, dantian, meridians, sect, realm) exactly as written
+- Preserve ALL character names exactly as written
+- Preserve ALL plot events, descriptions and content
+- Maintain tone — serious stays serious, humor stays humorous
+- Target reading level: engaging adult fiction prose
+- Do not summarize, skip, or add anything
+- Return only the corrected text`;
+
 export async function smoothTextWithOllama(
   text: string,
   ollamaUrl: string,
   model: string,
   onChunk: (chunk: string) => void
 ): Promise<string> {
-  const systemPrompt = `You are an expert editor specializing in Chinese web novels translated to English. Your job is to polish machine-translated text while preserving the author's style and all story content.
-
-Rules:
-- Fix all grammar errors and unnatural phrasing
-- Make sentences flow naturally in English
-- Preserve ALL character names exactly as written
-- Preserve ALL plot events, dialogue, and descriptions
-- Keep the same paragraph structure
-- Maintain the tone: serious moments stay serious, humor stays humorous
-- Do not summarize, skip, or add any content
-- Do not add commentary or explanations
-- Return only the corrected text, nothing else`;
   const res = await fetch(`${ollamaUrl}/api/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, prompt: text, system: systemPrompt, stream: true }),
+    body: JSON.stringify({ model, prompt: text, system: EDITOR_SYSTEM_PROMPT, stream: true }),
   });
   if (!res.ok) throw new Error(`Ollama API error: ${res.status}`);
   const reader = res.body!.getReader();
@@ -83,29 +85,15 @@ export async function smoothTextWithGemini(
   apiKey: string,
   onChunk: (chunk: string) => void
 ): Promise<string> {
-  await new Promise(resolve => setTimeout(resolve, 10000));
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+        body: JSON.stringify({
         contents: [{
           parts: [{
-            text: `You are an expert editor specializing in Chinese web novels translated to English. Polish the following machine-translated text to read naturally and fluently in English.
-
-Rules:
-- Fix all grammar errors and unnatural phrasing
-- Make sentences flow naturally in English
-- Preserve ALL character names exactly as written
-- Preserve ALL plot events, dialogue, and descriptions
-- Keep the same paragraph structure
-- Maintain the tone: serious moments stay serious, humor stays humorous
-- Do not summarize, skip, or add any content
-- Return only the corrected text, nothing else
-
-Text to polish:
-${text}`
+            text: `${EDITOR_SYSTEM_PROMPT}\n\nText to polish:\n${text}`
           }]
         }]
       }),
@@ -126,5 +114,78 @@ ${text}`
       } catch {}
     }
   }
+  return fullText;
+}
+
+export async function smoothTextWithGeminiParallel(
+  text: string,
+  apiKey: string,
+  onChunk: (chunk: string) => void,
+  concurrency = 2,
+  maxChunkSize = 8000
+): Promise<string> {
+  const paragraphs = text.split(/\n\n+/).filter(Boolean);
+  const chunks: string[] = [];
+  let buffer = '';
+  for (const p of paragraphs) {
+    if ((buffer + '\n\n' + p).length > maxChunkSize) {
+      if (buffer) chunks.push(buffer);
+      buffer = p;
+    } else {
+      buffer = buffer ? buffer + '\n\n' + p : p;
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  async function processChunk(chunk: string) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${EDITOR_SYSTEM_PROMPT}\n\nText to polish:\n${chunk}`
+            }]
+          }]
+        }),
+      }
+    );
+    if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const lines = decoder.decode(value).split('\n').filter(l => l.trim());
+      for (const line of lines) {
+        try {
+          const part = JSON.parse(line.replace(/^data: /, '')).candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (part) { full += part; }
+        } catch {}
+      }
+    }
+    return full;
+  }
+
+  const results: (string | null)[] = Array(chunks.length).fill(null);
+  let nextIndex = 0;
+
+  const workerCount = Math.min(concurrency, chunks.length);
+  const workers = Array.from({ length: workerCount }, async () => {
+    while (true) {
+      const i = nextIndex++;
+      if (i >= chunks.length) break;
+      const res = await processChunk(chunks[i]);
+      results[i] = res;
+      const combined = results.filter(Boolean).join('');
+      onChunk(combined);
+    }
+  });
+
+  await Promise.all(workers as Promise<void>[]);
+  const fullText = results.filter(Boolean).join('');
   return fullText;
 }

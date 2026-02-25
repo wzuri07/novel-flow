@@ -1,73 +1,155 @@
-# Welcome to your Lovable project
+# 📖 Novel Flow — AI-Powered Chinese Web Novel Reader
 
-## Project info
+A personal PWA (Progressive Web App) that fetches chapters from [lnmtl.com](https://lnmtl.com), extracts the machine-translated text, and polishes it using a local AI (Ollama) or Google Gemini API — so you can actually enjoy reading Chinese web novels in English.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+---
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- 📥 Fetch any chapter directly from lnmtl.com by pasting the URL
+- 🤖 AI grammar smoothing via **Ollama** (local, free, private) or **Google Gemini** (fast, free tier)
+- 🔄 Streaming output — text appears as it's generated, no waiting for the full chapter
+- 📖 Clean reader interface with dark/light mode
+- 🔤 Adjustable font size
+- ⬅️ ➡️ Previous / Next chapter navigation
+- 📱 Installable as a PWA on Android and iOS
+- 🔒 100% private — all processing happens on your own PC
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend:** React + TypeScript + Vite + Tailwind CSS + shadcn/ui
+- **AI (local):** Ollama running Gemma3 locally on your PC
+- **AI (cloud):** Google Gemini API (free tier)
+- **CORS Proxy:** local-cors-proxy (runs on your PC)
+- **Remote access:** Tailscale (access from phone anywhere)
+- **Hosting:** GitHub Pages (UI only)
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 How It Works
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```
+Your Phone / Browser
+        ↓
+  React PWA (GitHub Pages or local)
+        ↓
+  Local CORS Proxy (port 8010) → lnmtl.com chapter
+        ↓
+  Ollama (port 11434) or Gemini API
+        ↓
+  Smoothed, clean English text displayed in reader
+```
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## ⚙️ Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+- [Node.js](https://nodejs.org) (LTS version)
+- [Ollama](https://ollama.com) installed on your PC
+- [Tailscale](https://tailscale.com) (optional, for phone access from anywhere)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/wzuri07/novel-flow.git
+cd novel-flow
+
+# Install dependencies
+npm install
+
+# Install the CORS proxy globally
+npm install -g local-cors-proxy
+```
+
+### Pull an AI model
+
+```bash
+ollama pull gemma3:12b   # High quality, slower (recommended for 16GB+ RAM)
+ollama pull gemma3:4b    # Faster, good quality (recommended for 8GB RAM)
+```
+
+### Start everything
+
+Either run the batch file (Windows):
+
+```
+novel-reader-start.bat
+```
+
+Or manually in separate terminals:
+
+```bash
+# Terminal 1 — Start Ollama
+set OLLAMA_ORIGINS=*
+set OLLAMA_HOST=0.0.0.0:11434
+ollama serve
+
+# Terminal 2 — Start CORS proxy
+lcp --proxyUrl https://lnmtl.com --port 8010 --proxyPartial proxy
+
+# Terminal 3 — Start the app
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Then open your browser at:
+```
+http://localhost:8080
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 📱 Phone Access
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Install [Tailscale](https://tailscale.com) on both your PC and phone
+2. Sign in with the same account on both
+3. Find your PC's Tailscale IP (e.g. `100.x.x.x`)
+4. Open `http://100.x.x.x:8080` on your phone browser
+5. Tap **Add to Home Screen** to install as a PWA
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## ⚙️ Settings
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Click the gear icon ⚙️ in the top right to configure:
 
-## How can I deploy this project?
+| Setting | Default | Description |
+|---|---|---|
+| Ollama API URL | `http://100.x.x.x:11434` | Your local Ollama endpoint |
+| Model Name | `gemma3:12b` | Any Ollama model you have pulled |
+| CORS Proxy URL | `http://100.x.x.x:8010/proxy` | Local proxy for fetching lnmtl.com |
+| Gemini API Key | *(empty)* | Optional — get free key at aistudio.google.com |
+| AI Provider | Ollama | Toggle between Ollama and Gemini |
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 🆓 Cost
 
-Yes, you can!
+**Everything is free.**
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Component | Cost |
+|---|---|
+| Ollama + models | Free |
+| GitHub Pages hosting | Free |
+| local-cors-proxy | Free |
+| Tailscale personal | Free |
+| Gemini API (free tier) | Free (1,500 requests/day) |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## 📝 Notes
+
+- This app is for **personal use only**
+- Your PC must be on and running for the app to work
+- The batch file can be placed in your Windows startup folder to auto-start everything on boot
+- GitHub Pages version is for reference only — use the local version at `http://localhost:8080` for full functionality
+
+---
+
+## 🙏 Credits
+
+Built with [Lovable](https://lovable.dev), [Ollama](https://ollama.com), and [Google Gemini](https://aistudio.google.com).
