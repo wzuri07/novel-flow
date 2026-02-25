@@ -82,6 +82,36 @@ export default function SettingsPanel({ open, onClose, settings, onUpdate }: Set
             />
             <p className="text-xs text-muted-foreground mt-1">Needed to fetch chapters from lnmtl.com</p>
           </div>
+          {/* AI Provider Toggle */}
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-foreground">AI Provider</label>
+            <div className="flex rounded-lg overflow-hidden border border-border">
+              <button
+                onClick={() => onUpdate({ useGemini: false })}
+                className={`px-3 py-2 text-sm transition-colors ${!settings.useGemini ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
+              >
+                Ollama
+              </button>
+              <button
+                onClick={() => onUpdate({ useGemini: true })}
+                className={`px-3 py-2 text-sm transition-colors ${settings.useGemini ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
+              >
+                Gemini
+              </button>
+            </div>
+          </div>
+          {/* Gemini API Key */}
+          <div>
+            <label className="text-sm text-foreground block mb-1.5">Gemini API Key</label>
+            <input
+              type="password"
+              value={settings.geminiKey}
+              onChange={(e) => onUpdate({ geminiKey: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Paste your Gemini API key here"
+            />
+            <p className="text-xs text-muted-foreground mt-1">If set, Gemini will be used instead of Ollama</p>
+          </div>
         </div>
       </div>
     </div>

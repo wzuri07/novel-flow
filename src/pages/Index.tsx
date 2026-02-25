@@ -9,6 +9,7 @@ import {
   extractChapterText,
   smoothTextWithOllama,
   parseChapterUrl,
+  smoothTextWithGemini,
 } from '@/lib/chapterUtils';
 
 type Stage = 'fetching' | 'extracting' | 'smoothing';
@@ -38,7 +39,13 @@ const Index = () => {
         if (!raw) throw new Error('Could not extract chapter text. The page structure may have changed.');
 
         setStage('smoothing');
-        const smoothed = await smoothTextWithOllama(raw, settings.ollamaUrl, settings.modelName);
+        const smoothed = settings.useGemini && settings.geminiKey
+  ? await smoothTextWithGemini(raw, settings.geminiKey, (chunk) => {
+      setChapterText(chunk);
+    })
+  : await smoothTextWithOllama(raw, settings.ollamaUrl, settings.modelName, (chunk) => {
+      setChapterText(chunk);
+    });
 
         setChapterText(smoothed || raw);
         setCurrentUrl(chapterUrl);
@@ -150,7 +157,7 @@ const Index = () => {
         )}
 
         {/* Reader */}
-        {chapterText && !loading && (
+        {chapterText && (
           <>
             {/* Quick URL bar for loading new chapters */}
             <form onSubmit={handleSubmit} className="mb-8">

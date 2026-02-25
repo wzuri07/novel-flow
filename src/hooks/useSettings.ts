@@ -6,14 +6,18 @@ export interface AppSettings {
   fontSize: number;
   darkMode: boolean;
   corsProxy: string;
+   geminiKey: string;
+   useGemini: boolean;
 }
 
 const DEFAULTS: AppSettings = {
-  ollamaUrl: 'http://localhost:11434',
+  ollamaUrl: 'http://100.80.232.61:11434',
   modelName: 'gemma3:12b',
   fontSize: 18,
   darkMode: true,
-  corsProxy: 'https://corsproxy.io/?url=',
+  corsProxy: 'http://100.80.232.61:8010/proxy',
+  geminiKey: '',
+  useGemini: false,
 };
 
 const STORAGE_KEY = 'novel-reader-settings';
