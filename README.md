@@ -1,155 +1,99 @@
-# 📖 Novel Flow — AI-Powered Chinese Web Novel Reader
+# Novel Flow
 
-A personal PWA (Progressive Web App) that fetches chapters from [lnmtl.com](https://lnmtl.com), extracts the machine-translated text, and polishes it using a local AI (Ollama) or Google Gemini API — so you can actually enjoy reading Chinese web novels in English.
+**A reader app that turns machine-translated Chinese web novels into clean, natural English using a local AI model.**
 
----
+![Novel Flow reader](docs/screenshot.png)
 
-## ✨ Features
+Machine-translated web novels are readable, but barely: broken grammar, odd word order, names that change mid-paragraph. Novel Flow fetches a chapter, sends the raw text to a language model, and streams back a polished version in a distraction-free reader. By default it runs entirely on your own PC with [Ollama](https://ollama.com), so nothing leaves your machine and it costs nothing to use.
 
-- 📥 Fetch any chapter directly from lnmtl.com by pasting the URL
-- 🤖 AI grammar smoothing via **Ollama** (local, free, private) or **Google Gemini** (fast, free tier)
-- 🔄 Streaming output — text appears as it's generated, no waiting for the full chapter
-- 📖 Clean reader interface with dark/light mode
-- 🔤 Adjustable font size
-- ⬅️ ➡️ Previous / Next chapter navigation
-- 📱 Installable as a PWA on Android and iOS
-- 🔒 100% private — all processing happens on your own PC
+## Features
 
----
+- **Paste a chapter URL** from lnmtl.com and the text is extracted automatically
+- **Two AI backends:** Ollama running locally (private, free) or Google Gemini (faster, free tier)
+- **Streaming output:** text appears as it is generated instead of after the whole chapter
+- **Reader comforts:** dark and light themes, adjustable font size, previous/next chapter navigation
+- **Installable PWA:** add it to your phone's home screen and read from anywhere over Tailscale
 
-## 🛠️ Tech Stack
+## Tech stack
 
-- **Frontend:** React + TypeScript + Vite + Tailwind CSS + shadcn/ui
-- **AI (local):** Ollama running Gemma3 locally on your PC
-- **AI (cloud):** Google Gemini API (free tier)
-- **CORS Proxy:** local-cors-proxy (runs on your PC)
-- **Remote access:** Tailscale (access from phone anywhere)
-- **Hosting:** GitHub Pages (UI only)
+| Layer | Tools |
+|---|---|
+| Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui |
+| AI | Ollama (Gemma 3) or Google Gemini API |
+| Networking | local-cors-proxy, Tailscale for phone access |
+| Testing | Vitest |
 
----
-
-## 🚀 How It Works
+## How it works
 
 ```
-Your Phone / Browser
-        ↓
-  React PWA (GitHub Pages or local)
-        ↓
-  Local CORS Proxy (port 8010) → lnmtl.com chapter
-        ↓
-  Ollama (port 11434) or Gemini API
-        ↓
-  Smoothed, clean English text displayed in reader
+Phone or browser
+      │
+      ▼
+React PWA ──► local CORS proxy (port 8010) ──► lnmtl.com chapter
+      │
+      ▼
+Ollama (port 11434) or Gemini API
+      │
+      ▼
+Polished English, streamed into the reader
 ```
 
----
+The browser cannot fetch lnmtl.com directly because of CORS, so a small proxy on the PC fetches the page and the app extracts the chapter text from it. The text is then sent to the selected model with instructions to fix grammar and readability while keeping names and meaning intact.
 
-## ⚙️ Setup
+## Getting started
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org) (LTS version)
-- [Ollama](https://ollama.com) installed on your PC
-- [Tailscale](https://tailscale.com) (optional, for phone access from anywhere)
-
-### Installation
+**Requirements:** [Node.js](https://nodejs.org) (LTS), [Ollama](https://ollama.com), and optionally [Tailscale](https://tailscale.com) for phone access.
 
 ```bash
-# Clone the repo
 git clone https://github.com/wzuri07/novel-flow.git
 cd novel-flow
-
-# Install dependencies
 npm install
-
-# Install the CORS proxy globally
 npm install -g local-cors-proxy
+
+# Pick a model that fits your RAM
+ollama pull gemma3:12b   # better quality, 16 GB+ RAM
+ollama pull gemma3:4b    # faster, 8 GB RAM
 ```
 
-### Pull an AI model
+On Windows, double-click **`novel-reader-start.bat`** to start Ollama, the proxy and the app in one go. On other systems, run each in its own terminal:
 
 ```bash
-ollama pull gemma3:12b   # High quality, slower (recommended for 16GB+ RAM)
-ollama pull gemma3:4b    # Faster, good quality (recommended for 8GB RAM)
-```
-
-### Start everything
-
-Either run the batch file (Windows):
-
-```
-novel-reader-start.bat
-```
-
-Or manually in separate terminals:
-
-```bash
-# Terminal 1 — Start Ollama
-set OLLAMA_ORIGINS=*
-set OLLAMA_HOST=0.0.0.0:11434
-ollama serve
-
-# Terminal 2 — Start CORS proxy
+OLLAMA_ORIGINS=* OLLAMA_HOST=0.0.0.0:11434 ollama serve
 lcp --proxyUrl https://lnmtl.com --port 8010 --proxyPartial proxy
-
-# Terminal 3 — Start the app
 npm run dev
 ```
 
-Then open your browser at:
-```
-http://localhost:8080
-```
+Then open <http://localhost:8080>.
 
----
+### Reading on your phone
 
-## 📱 Phone Access
+1. Install Tailscale on your PC and phone and sign in with the same account.
+2. Open `http://<your-PC's-Tailscale-IP>:8080` on the phone.
+3. Use **Add to Home Screen** to install it as an app.
 
-1. Install [Tailscale](https://tailscale.com) on both your PC and phone
-2. Sign in with the same account on both
-3. Find your PC's Tailscale IP (e.g. `100.x.x.x`)
-4. Open `http://100.x.x.x:8080` on your phone browser
-5. Tap **Add to Home Screen** to install as a PWA
+### Settings
 
----
+Open the gear icon in the top-right corner:
 
-## ⚙️ Settings
-
-Click the gear icon ⚙️ in the top right to configure:
-
-| Setting | Default | Description |
+| Setting | Default | Purpose |
 |---|---|---|
-| Ollama API URL | `http://100.x.x.x:11434` | Your local Ollama endpoint |
-| Model Name | `gemma3:12b` | Any Ollama model you have pulled |
-| CORS Proxy URL | `http://100.x.x.x:8010/proxy` | Local proxy for fetching lnmtl.com |
-| Gemini API Key | *(empty)* | Optional — get free key at aistudio.google.com |
-| AI Provider | Ollama | Toggle between Ollama and Gemini |
+| AI provider | Ollama | Switch between Ollama and Gemini |
+| Ollama API URL | `http://100.x.x.x:11434` | Where your Ollama server is running |
+| Model name | `gemma3:12b` | Any model you have pulled |
+| CORS proxy URL | `http://100.x.x.x:8010/proxy` | The proxy that fetches chapters |
+| Gemini API key | empty | Free key from [Google AI Studio](https://aistudio.google.com) |
 
----
+## Scripts
 
-## 🆓 Cost
-
-**Everything is free.**
-
-| Component | Cost |
+| Command | What it does |
 |---|---|
-| Ollama + models | Free |
-| GitHub Pages hosting | Free |
-| local-cors-proxy | Free |
-| Tailscale personal | Free |
-| Gemini API (free tier) | Free (1,500 requests/day) |
+| `npm run dev` | Start the development server on port 8080 |
+| `npm run build` | Production build |
+| `npm test` | Run the test suite |
+| `npm run deploy` | Build and publish the UI to GitHub Pages |
 
----
+## Notes
 
-## 📝 Notes
-
-- This app is for **personal use only**
-- Your PC must be on and running for the app to work
-- The batch file can be placed in your Windows startup folder to auto-start everything on boot
-- GitHub Pages version is for reference only — use the local version at `http://localhost:8080` for full functionality
-
----
-
-## 🙏 Credits
-
-Built with [Lovable](https://lovable.dev), [Ollama](https://ollama.com), and [Google Gemini](https://aistudio.google.com).
+- Personal project for reading; the PC must be running for chapters to load.
+- The GitHub Pages build only hosts the interface. The proxy and Ollama still run on your PC.
+- The initial UI was scaffolded with [Lovable](https://lovable.dev).

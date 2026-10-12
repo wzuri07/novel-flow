@@ -79,7 +79,7 @@ const Index = () => {
         <div className="max-w-3xl mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2 text-primary">
             <BookOpen size={22} />
-            <span className="font-ui font-semibold text-foreground text-base">Novel Reader</span>
+            <span className="font-ui font-semibold text-foreground text-base">Novel Flow</span>
           </div>
 
           <div className="flex items-center gap-1">

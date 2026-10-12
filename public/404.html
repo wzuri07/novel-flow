@@ -1,35 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <title>Novel Flow</title>
-    <script type="text/javascript">
-      var pathSegmentsToKeep = 1;
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.host + l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+    <script>
+      // The app uses hash-based routing, so any unknown path goes back to the app root.
+      var base = window.location.pathname.split('/').slice(0, 2).join('/') + '/';
+      window.location.replace(window.location.origin + base);
     </script>
   </head>
-  <body>
-  </body>
+  <body></body>
 </html>
-```
-
-Press `Ctrl + S` to save.
-
----
-
-**Step 2 — Deploy again**
-```
-npm run deploy
-```
-
----
-
-**Step 3 — Visit**
-```
-https://wzuri07.github.io/novel-flow
