@@ -1,5 +1,7 @@
 # Novel Flow
 
+[![CI](https://github.com/wzuri07/novel-flow/actions/workflows/ci.yml/badge.svg)](https://github.com/wzuri07/novel-flow/actions/workflows/ci.yml)
+
 **A reader app that turns machine-translated Chinese web novels into clean, natural English using a local AI model.**
 
 ![Novel Flow reader](docs/screenshot.png)
@@ -21,7 +23,7 @@ Machine-translated web novels are readable, but barely: broken grammar, odd word
 | Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui |
 | AI | Ollama (Gemma 3) or Google Gemini API |
 | Networking | local-cors-proxy, Tailscale for phone access |
-| Testing | Vitest |
+| Testing | Vitest, GitHub Actions CI |
 
 ## How it works
 
@@ -78,9 +80,9 @@ Open the gear icon in the top-right corner:
 | Setting | Default | Purpose |
 |---|---|---|
 | AI provider | Ollama | Switch between Ollama and Gemini |
-| Ollama API URL | `http://100.x.x.x:11434` | Where your Ollama server is running |
+| Ollama API URL | port 11434 on the host you opened the app from | Where your Ollama server is running |
 | Model name | `gemma3:12b` | Any model you have pulled |
-| CORS proxy URL | `http://100.x.x.x:8010/proxy` | The proxy that fetches chapters |
+| CORS proxy URL | port 8010 on the host you opened the app from | The proxy that fetches chapters |
 | Gemini API key | empty | Free key from [Google AI Studio](https://aistudio.google.com) |
 
 ## Scripts
@@ -90,6 +92,7 @@ Open the gear icon in the top-right corner:
 | `npm run dev` | Start the development server on port 8080 |
 | `npm run build` | Production build |
 | `npm test` | Run the test suite |
+| `npm run lint` | Lint the code |
 | `npm run deploy` | Build and publish the UI to GitHub Pages |
 
 ## Notes

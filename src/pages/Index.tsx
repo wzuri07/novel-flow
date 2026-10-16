@@ -56,8 +56,8 @@ const Index = () => {
         setCurrentUrl(chapterUrl);
         setUrl(chapterUrl);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err: any) {
-        setError(err.message || 'Something went wrong');
+      } catch (err: unknown) {
+        setError(err instanceof Error && err.message ? err.message : 'Something went wrong');
       } finally {
         setLoading(false);
       }
