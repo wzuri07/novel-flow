@@ -100,3 +100,7 @@ Open the gear icon in the top-right corner:
 - Personal project for reading; the PC must be running for chapters to load.
 - The GitHub Pages build only hosts the interface. The proxy and Ollama still run on your PC.
 - The initial UI was scaffolded with [Lovable](https://lovable.dev).
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
